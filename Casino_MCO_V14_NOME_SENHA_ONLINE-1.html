@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Casino MCO • V13</title>
+<meta name="theme-color" content="#07040c">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#07040c;--p:#120b19;--p2:#1b1025;--line:#382745;--txt:#faf7fc;--muted:#aaa0b4;--gold:#f4ce62;--purple:#9258ff;--green:#35d28a;--red:#ff5369}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -8%,#482263 0,#160b20 30%,#060409 75%);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+header{position:sticky;top:0;z-index:40;background:#08050de8;backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.head{max-width:1200px;margin:auto;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;gap:10px;align-items:center}.logo{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#a66aff,#5421aa);box-shadow:0 0 30px #8d55ff55;font-size:24px}.brand h1{margin:0;font-size:21px}.brand small{color:var(--muted)}.gradient{background:linear-gradient(90deg,#fff,#d8bdff,#f4ce62);-webkit-background-clip:text;background-clip:text;color:transparent}
+.userbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.wallet,.userbtn{padding:9px 12px;border-radius:13px;border:1px solid #4a3558;background:#181020}.wallet b{color:#ffe99b}.userbtn{color:#fff;font-weight:900}.wrap{max-width:1200px;margin:auto;padding:20px 15px 65px}.panel,.card{background:linear-gradient(155deg,#1b1025,#0d0912);border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px #0006}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:15px}.heroMain{padding:30px;position:relative;overflow:hidden}.heroMain:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-120px;top:-120px;background:#8d55ff18}.eyebrow,.tag{display:inline-flex;padding:7px 11px;border:1px solid #4e385f;background:#21152d;border-radius:999px;color:#ddd2e7;font-size:11px;font-weight:950}.hero h2{font-size:clamp(38px,6vw,65px);line-height:.97;margin:17px 0 13px}.hero p{color:var(--muted);line-height:1.55;max-width:720px}.heroSide{padding:23px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}.identity{margin-top:7px;padding:16px;border:1px solid #3c2b4a;background:#0c0811;border-radius:17px}.identity .name{font-size:24px;font-weight:950}.identity .club{color:var(--muted);margin-top:4px}.bigBalance{font-size:34px;font-weight:950;color:#ffe99b;margin-top:5px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #4b3859;background:#23162f;color:#fff;padding:11px 15px;border-radius:12px;font-weight:900;transition:.16s}.btn:hover{transform:translateY(-1px);filter:brightness(1.12)}.btn.primary{background:linear-gradient(135deg,#a86dff,#5e2cc8);border:0;box-shadow:0 8px 24px #8d55ff35}.btn.gold{background:linear-gradient(135deg,#ffe495,#ae7620);color:#170d02;border:0}.btn.green{background:#103d2d;border-color:#287b58}.btn.red{background:#471725;border-color:#803142}.btn.small{padding:8px 10px;font-size:12px}
+.sectionTitle{display:flex;justify-content:space-between;align-items:end;gap:10px;margin:28px 0 13px}.sectionTitle h2{margin:0;font-size:25px}.muted{color:var(--muted)}
+.games{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.gameCard{padding:18px;min-height:205px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative}.gameIcon{font-size:45px;filter:drop-shadow(0 7px 13px #0008)}.gameCard h3{margin:7px 0 5px}.gameCard p{color:var(--muted);font-size:13px;line-height:1.45}.game{display:none}.game.active{display:block}.stage{padding:22px;min-height:540px;text-align:center;overflow:hidden}.gameHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.betbar{display:flex;justify-content:center;align-items:end;gap:9px;flex-wrap:wrap;margin-top:19px}.field{display:grid;gap:6px;text-align:left}.field label{font-size:11px;color:var(--muted);font-weight:850}.field input,.field select,.login input{width:100%;background:#09060d;color:#fff;border:1px solid #3c2b49;border-radius:11px;padding:11px;outline:none}.field input:focus,.field select:focus,.login input:focus{border-color:#965dff;box-shadow:0 0 0 3px #9258ff22}.result{min-height:56px;display:grid;place-items:center;max-width:800px;margin:17px auto 0;background:#09060d;border:1px solid var(--line);border-radius:14px;padding:10px;font-weight:900}.win{color:var(--green)}.loss{color:#ff7381}
+.history{max-height:330px;overflow:auto;padding:14px}.historyRow{display:flex;justify-content:space-between;gap:12px;padding:11px 3px;border-bottom:1px solid var(--line)}.empty{padding:22px;text-align:center;color:var(--muted)}
+/* Roleta */
+.rouletteWrap{width:min(390px,88vw);aspect-ratio:1;margin:13px auto 18px;position:relative;display:grid;place-items:center}.wheel{width:100%;height:100%;border-radius:50%;border:10px solid #c49543;background:conic-gradient(from -4.86deg,#15915a 0 9.73deg,#151117 9.73deg 19.46deg,#c83245 19.46deg 29.19deg,#151117 29.19deg 38.92deg,#c83245 38.92deg 48.65deg,#151117 48.65deg 58.38deg,#c83245 58.38deg 68.11deg,#151117 68.11deg 77.84deg,#c83245 77.84deg 87.57deg,#151117 87.57deg 97.3deg,#c83245 97.3deg 107.03deg,#151117 107.03deg 116.76deg,#c83245 116.76deg 126.49deg,#151117 126.49deg 136.22deg,#c83245 136.22deg 145.95deg,#151117 145.95deg 155.68deg,#c83245 155.68deg 165.41deg,#151117 165.41deg 175.14deg,#c83245 175.14deg 184.87deg,#151117 184.87deg 194.6deg,#c83245 194.6deg 204.33deg,#151117 204.33deg 214.06deg,#c83245 214.06deg 223.79deg,#151117 223.79deg 233.52deg,#c83245 233.52deg 243.25deg,#151117 243.25deg 252.98deg,#c83245 252.98deg 262.71deg,#151117 262.71deg 272.44deg,#c83245 272.44deg 282.17deg,#151117 282.17deg 291.9deg,#c83245 291.9deg 301.63deg,#151117 301.63deg 311.36deg,#c83245 311.36deg 321.09deg,#151117 321.09deg 330.82deg,#c83245 330.82deg 340.55deg,#151117 340.55deg 350.28deg,#c83245 350.28deg 360deg);box-shadow:0 20px 55px #000a;transition:transform 4.35s cubic-bezier(.08,.72,.08,1)}.numberRing{position:absolute;inset:12%;border-radius:50%;pointer-events:none}.num{position:absolute;left:50%;top:50%;width:27px;height:27px;margin:-13.5px;display:grid;place-items:center;font-size:11px;font-weight:950}.hub{position:absolute;width:82px;height:82px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#7045bf,#190d27 70%);border:4px solid #f4d476;font-size:24px;font-weight:1000;box-shadow:0 0 25px #000b}.pointer{position:absolute;top:-1px;left:50%;transform:translateX(-50%);z-index:4;border-left:13px solid transparent;border-right:13px solid transparent;border-top:0;border-bottom:26px solid #f4ce62;filter:drop-shadow(0 4px 4px #000)}.ballTrack{position:absolute;inset:7%;border-radius:50%;pointer-events:none}.ball{display:none;position:absolute;left:50%;top:0;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;background:#fff;box-shadow:0 0 10px #fff,0 0 22px #fff8}.spinning .ball{display:block;animation:ballSpin 5.5s cubic-bezier(.08,.76,.09,1)}@keyframes ballSpin{0%{transform:rotate(0)}24%{transform:rotate(720deg) scale(.96)}52%{transform:rotate(1280deg) scale(.92)}78%{transform:rotate(1740deg) scale(.98)}100%{transform:rotate(2080deg)}}.lights{display:flex;justify-content:center;gap:6px}.lights i{width:7px;height:7px;border-radius:50%;background:#4b3c53}.spinning+.lights i{animation:blink .3s infinite alternate}@keyframes blink{to{background:#ffe58b;box-shadow:0 0 12px #ffe58b}}
+/* Slots */
+.slotsMachine{max-width:670px;margin:22px auto;padding:22px;border-radius:28px;border:2px solid #a87531;background:linear-gradient(145deg,#391d10,#130b09);box-shadow:0 25px 60px #000a}.slotTitle{color:#ffe28d;font-weight:1000;letter-spacing:3px}.slots{display:flex;justify-content:center;gap:10px;margin:18px 0}.reel{width:112px;height:125px;border-radius:17px;background:linear-gradient(#fff,#d9d1c5);color:#181218;display:grid;place-items:center;font-size:56px;border:5px solid #ba863b;box-shadow:inset 0 0 20px #0003,0 9px 18px #0008}.reel.spin{animation:reel .11s linear infinite}.reel.flash{animation:flash .5s ease 3}@keyframes reel{0%{transform:translateY(-10px);filter:blur(1px)}25%{transform:translateY(8px) rotate(-2deg);filter:blur(3px)}50%{transform:translateY(-6px) rotate(2deg);filter:blur(2px)}75%{transform:translateY(10px) rotate(-1deg);filter:blur(3px)}100%{transform:translateY(-10px);filter:blur(1px)}}@keyframes flash{50%{transform:scale(1.08);box-shadow:0 0 35px #ffe58b}} 
+/* Blackjack */
+.cards21{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:92px;margin:15px 0}.playing{width:64px;height:90px;border-radius:11px;background:#f5f1e9;color:#171018;display:grid;place-items:center;font-size:25px;font-weight:950;box-shadow:0 8px 18px #0007;animation:deal .35s ease both}.redCard{color:#c32f45}@keyframes deal{0%{opacity:0;transform:translateY(-55px) rotate(-16deg) rotateY(90deg) scale(.8)}60%{opacity:1;transform:translateY(7px) rotate(2deg) rotateY(-8deg) scale(1.04)}100%{opacity:1;transform:none}}.blackBtns{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+/* High/low */
+.cardReveal{display:flex;justify-content:center;align-items:center;gap:20px;margin:30px 0}.bigCard{width:105px;height:145px;border-radius:18px;background:#f5f1e9;color:#171018;display:grid;place-items:center;font-size:45px;font-weight:1000;border:4px solid #b89148;box-shadow:0 15px 30px #0008}.flip{animation:flip .7s ease}@keyframes flip{50%{transform:rotateY(180deg) scale(.9)}}.arrow{font-size:38px;color:#f4ce62}
+/* Dados */
+.diceArena{display:flex;justify-content:center;gap:45px;align-items:center;margin:30px 0}.die{width:100px;height:100px;border-radius:22px;background:linear-gradient(145deg,#fff,#cfc7bd);color:#151017;display:grid;place-items:center;font-size:48px;box-shadow:0 14px 28px #0009;border:5px solid #9f7136}.shake{animation:diceShake .7s ease}@keyframes diceShake{0%{transform:rotate(0) scale(1)}15%{transform:rotate(35deg) translate(-8px) scale(1.05)}30%{transform:rotate(-45deg) translate(10px) scale(.94)}45%{transform:rotate(55deg) translate(-7px)}60%{transform:rotate(-50deg) translate(8px)}75%{transform:rotate(28deg) scale(1.04)}100%{transform:rotate(0) scale(1)}}
+/* Cara/coroa */
+.coin{width:155px;height:155px;border-radius:50%;margin:25px auto;background:radial-gradient(circle at 35% 30%,#fff2a8,#bd8426 55%,#71460f);border:9px solid #f2ce69;display:grid;place-items:center;font-size:27px;font-weight:1000;box-shadow:0 20px 40px #0009}.coin.flip{animation:coinFlip 1.3s ease}@keyframes coinFlip{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(900deg) translateY(-70px)}100%{transform:rotateY(1800deg) translateY(0)}}
+/* Pênalti */
+.goal{width:min(620px,92vw);height:220px;margin:24px auto 10px;border:7px solid #eee;border-bottom:13px solid #eee;background:repeating-linear-gradient(90deg,#ffffff0c 0 28px,#fff2 29px 31px),linear-gradient(#183e55,#12232e);position:relative;overflow:hidden;box-shadow:0 18px 40px #0009}.keeper{position:absolute;bottom:15px;left:50%;font-size:58px;transform:translateX(-50%);transition:all .55s cubic-bezier(.2,.8,.2,1)}.penBall{position:absolute;width:25px;height:25px;border-radius:50%;background:#fff;left:50%;bottom:28px;transform:translateX(-50%);box-shadow:0 3px 8px #000;transition:all .6s cubic-bezier(.2,.8,.2,1)}.shoot{animation:shoot .6s ease}@keyframes shoot{to{transform:translate(-50%,-145px) scale(.65)}}
+/* login/admin */
+.overlay{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:#05030a99;backdrop-filter:blur(9px);padding:17px}.overlay.on{display:grid}.login{width:min(500px,100%);padding:24px;border-radius:25px;background:linear-gradient(160deg,#1d1029,#0d0912);border:1px solid #513866;box-shadow:0 30px 90px #000b}.login h2{margin:10px 0 5px}.login p{color:var(--muted);line-height:1.45}.loginGrid{display:grid;gap:11px;margin:17px 0}.login input{text-align:center;font-size:17px}.hint{padding:11px;border-radius:12px;background:#f0c95c0b;border:1px solid #f0c95c2b;color:#d8c9b0;font-size:12px}.loginActions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.admin{display:none}.admin.on{display:block}.adminGrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.adminForm{padding:18px}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.participants{padding:17px}.person{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.person:last-child{border:0}.personName{font-weight:950}.personMeta{color:var(--muted);font-size:12px;margin-top:3px}.idtag{display:inline-block;margin-top:6px;padding:5px 9px;border-radius:8px;background:#25182f;border:1px solid #4a3557;font-size:11px}.adminButtons{display:flex;gap:6px;flex-wrap:wrap}.audit{max-height:360px;overflow:auto;padding:15px}
+.gameHelp{width:32px;height:32px;border-radius:50%;border:1px solid #5b426c;background:#21152c;color:#fff;font-weight:1000;display:inline-grid;place-items:center;box-shadow:0 6px 16px #0005}.gameHelp:hover{background:#9258ff;transform:scale(1.05)}
+.helpTitle{display:flex;align-items:center;gap:10px}
+.helpModal{width:min(560px,100%);padding:23px;border-radius:25px;background:linear-gradient(160deg,#20112e,#0d0912);border:1px solid #513866;box-shadow:0 30px 90px #000b}
+.helpModal h2{margin:4px 0 10px}.helpModal .helpBody{color:#d0c7d5;line-height:1.6}.helpModal .helpRule{margin:12px 0;padding:12px;border:1px solid #3b2b49;border-radius:13px;background:#0b0710}
+.navalBoard{display:grid;grid-template-columns:42px repeat(6,minmax(42px,1fr));gap:6px;max-width:650px;margin:22px auto;padding:10px;border-radius:18px;background:#071722;border:1px solid #27546a;box-shadow:inset 0 0 35px #0008,0 18px 45px #0008}
+.navalHead,.navalSide{display:grid;place-items:center;color:#9fd8ed;font-weight:1000}.navalCell{aspect-ratio:1;border:1px solid #2d6179;border-radius:10px;background:linear-gradient(145deg,#123b50,#0a2636);color:#fff;font-size:17px;font-weight:1000;box-shadow:inset 0 0 15px #0005;transition:.2s}
+.navalCell:hover{transform:translateY(-2px);border-color:#70d5ff;box-shadow:0 0 18px #35b8ef55}.navalCell.revealed{animation:navalReveal .55s ease;background:#17101f;border-color:#8e64bd}.navalCell.winCell{background:radial-gradient(circle,#4fce94,#153f31);border-color:#61e4a7}.navalCell.lossCell{background:radial-gradient(circle,#d24d67,#441523);border-color:#ff6d83}.navalCell.prizeCell{background:radial-gradient(circle,#f1ca5d,#533b10);border-color:#ffe58b}
+@keyframes navalReveal{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(90deg) scale(.82)}100%{transform:rotateY(0) scale(1)}}.navalLegend{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;color:#bcb2c4;font-size:12px}.navalStatus{max-width:650px;margin:10px auto;padding:11px;border-radius:12px;background:#0a1117;border:1px solid #224658;color:#c8e8f5;font-weight:850}
+footer{text-align:center;color:#746a7e;font-size:12px;padding:25px}.toast{position:fixed;z-index:130;left:50%;bottom:18px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#171020;border:1px solid #513866;border-radius:13px;padding:12px 16px;box-shadow:0 15px 40px #0009;font-weight:900;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.games{grid-template-columns:1fr 1fr}.adminGrid{grid-template-columns:1fr}}@media(max-width:600px){.brand small{display:none}.head{padding:10px}.wrap{padding:14px 10px 50px}.heroMain,.heroSide{padding:20px}.hero h2{font-size:40px}.games{grid-template-columns:1fr}.stage{padding:15px 9px}.reel{width:84px;height:102px;font-size:45px}.slotsMachine{padding:14px 7px}.diceArena{gap:18px}.die{width:85px;height:85px}.person{grid-template-columns:1fr}.formGrid{grid-template-columns:1fr}}
+
+
+.horseTrack{display:grid;gap:10px;margin:20px auto;max-width:780px;padding:14px;border-radius:20px;background:linear-gradient(180deg,#102817,#08150d);border:1px solid #2c5b38;box-shadow:inset 0 0 35px #0009,0 18px 45px #0008}
+.horseLane{position:relative;height:58px;border-radius:13px;overflow:hidden;background:repeating-linear-gradient(90deg,#1b3924 0,#1b3924 32px,#24482d 32px,#24482d 64px);border:1px solid #315c3b}
+.horseLane:after{content:"";position:absolute;right:5px;top:0;bottom:0;width:5px;background:repeating-linear-gradient(0deg,#fff 0,#fff 8px,#111 8px,#111 16px);opacity:.75}
+.horseLabel{position:absolute;left:8px;top:8px;z-index:4;padding:4px 8px;border-radius:9px;background:#0a0f0bba;color:#fff;font-size:11px;font-weight:1000}
+.horseRunner{position:absolute;left:0;top:3px;width:54px;height:52px;display:grid;place-items:center;border-radius:50%;background:var(--horseColor);font-size:34px;line-height:50px;filter:drop-shadow(0 7px 5px #0008);z-index:3;will-change:transform}
+.horseRunner.running{animation:horseBob .18s infinite alternate}
+@keyframes horseBob{from{transform:translateY(1px) rotate(-1deg)}to{transform:translateY(-3px) rotate(1deg)}}
+.horseLane.finished .horseRunner{animation:none}
+</style>
+</head>
+<body>
+<header><div class="head">
+ <div class="brand"><div class="logo">🎰</div><div><h1>Casino <span class="gradient">MCO</span></h1><small>Modo Carreira Online • fichas virtuais</small></div></div>
+ <div class="userbar"><div class="wallet">🪙 <b id="topBalance">0</b></div><button class="userbtn" id="userButton">🔐 Entrar</button></div>
+</div></header>
+
+<main class="wrap">
+<section id="home">
+ <div class="hero">
+  <div class="panel heroMain"><span class="eyebrow">🎰 CASINO MCO • V3</span><h2>Entre na mesa.<br><span class="gradient">Jogue pelo seu clube.</span></h2><p>Sete jogos com animações, fichas virtuais e acesso individual. O participante nunca escolhe outro clube: o ID de dois dígitos identifica exatamente o perfil cadastrado pela administração.</p><div class="actions"><button class="btn primary" onclick="openLogin()">🔐 Entrar para jogar</button><button class="btn" onclick="document.getElementById('gamesTitle').scrollIntoView({behavior:'smooth'})">🎮 Ver jogos</button></div></div>
+  <div class="panel heroSide"><div><div class="muted">PARTICIPANTE</div><div class="identity"><div class="name" id="who">Nenhum jogador</div><div class="club" id="whoClub">Nome + senha para entrar</div></div></div><div><div class="muted">SALDO</div><div class="bigBalance"><span id="heroBalance">0</span> 🪙</div><div class="actions"><button class="btn small" onclick="openLogin()">🔄 Trocar</button><button class="btn small" onclick="openAdmin()">🔒 Administração</button></div></div></div>
+ </div>
+ <div class="sectionTitle" id="gamesTitle"><h2>🎮 Sete mesas</h2><span class="muted">Animações + jogabilidade</span></div>
+ <div class="games">
+  <div class="card gameCard"><div><div class="gameIcon">🎡</div><h3>Roleta MCO</h3><p>Roda, números, ponteiro e bolinha animada.</p></div><button class="btn primary" onclick="openGame('roulette')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🎰</div><h3>Slots Royale</h3><p>Três rolos com parada individual e efeitos de vitória.</p></div><button class="btn primary" onclick="openGame('slots')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🃏</div><h3>Blackjack 21</h3><p>Cartas distribuídas, banca e decisões em tempo real.</p></div><button class="btn primary" onclick="openGame('blackjack')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🎲</div><h3>High Roller</h3><p>Compare duas cartas e escolha maior ou menor.</p></div><button class="btn primary" onclick="openGame('highlow')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🎲</div><h3>Duelo de Dados</h3><p>Você contra a banca. O maior resultado vence.</p></div><button class="btn primary" onclick="openGame('dice')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🪙</div><h3>Cara ou Coroa</h3><p>Escolha um lado e veja a moeda voar.</p></div><button class="btn primary" onclick="openGame('coin')">Abrir mesa</button></div>
+  <div class="card gameCard"><div><div class="gameIcon">🏇</div><h3>Corrida MCO</h3><p>Escolha seu cavalo, faça sua aposta e acompanhe a corrida ao vivo.</p></div><button class="btn primary" onclick="openGame('horses')">Abrir mesa</button></div>
+ </div>
+ <div class="sectionTitle"><h2>📜 Meu histórico</h2><span class="muted">Últimas jogadas</span></div><div class="card history" id="history"></div>
+</section>
+
+<section id="roulette" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🎡 Roleta MCO</h2><button class="gameHelp" onclick="showHelp('roulette')" aria-label="Como funciona">?</button></div><div class="muted">Roleta europeia • 0–36</div></div><div class="wallet">🪙 <b class="live">0</b></div></div>
+<div class="rouletteWrap" id="rw"><div class="pointer"></div><div class="wheel" id="wheel"><div class="numberRing" id="numberRing"></div><div class="hub" id="rNumOut">?</div></div><div class="ballTrack"><div class="ball"></div></div></div><div class="lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="betbar"><div class="field"><label>Fichas</label><input id="rBet" type="number" min="1" value="100"></div><div class="field"><label>Aposta</label><select id="rType" onchange="toggleR()"><option value="red">🔴 Vermelho • 2x</option><option value="black">⚫ Preto • 2x</option><option value="even">Par • 2x</option><option value="odd">Ímpar • 2x</option><option value="number">Número • 36x</option></select></div><div class="field" id="rNumField" style="display:none"><label>Número</label><input id="rTarget" type="number" min="0" max="36" value="17"></div><button class="btn gold" id="rBtn" onclick="roulette()">🎯 GIRAR</button></div><div class="result" id="rResult">Aposte e gire a roda.</div></div></section>
+
+<section id="slots" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🎰 Slots Royale</h2><button class="gameHelp" onclick="showHelp('slots')" aria-label="Como funciona">?</button></div><div class="muted">Três rolos • até 50x</div></div><div class="wallet">🪙 <b class="live">0</b></div></div><div class="slotsMachine"><div class="slotTitle">★ SLOTS ROYALE ★</div><div class="slots"><div class="reel" id="s1">🍒</div><div class="reel" id="s2">⭐</div><div class="reel" id="s3">7️⃣</div></div>🎰</div><div class="betbar"><div class="field"><label>Fichas</label><input id="sBet" type="number" min="1" value="100"></div><button class="btn gold" id="sBtn" onclick="slots()">🎰 GIRAR ROLOS</button></div><div class="result" id="sResult">Boa sorte.</div></div></section>
+
+<section id="blackjack" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🃏 Blackjack 21</h2><button class="gameHelp" onclick="showHelp('blackjack')" aria-label="Como funciona">?</button></div><div class="muted">Chegue a 21 sem estourar</div></div><div class="wallet">🪙 <b class="live">0</b></div></div><div class="betbar"><div class="field"><label>Aposta</label><input id="bBet" type="number" min="1" value="100"></div><button class="btn gold" onclick="bjStart()">🃏 NOVA MÃO</button></div><div class="muted" style="margin-top:18px">BANCA • <b id="dScore">—</b></div><div class="cards21" id="dCards"></div><hr style="border:0;border-top:1px solid var(--line);margin:15px 0"><div class="muted">VOCÊ • <b id="pScore">—</b></div><div class="cards21" id="pCards"></div><div class="blackBtns"><button class="btn" id="hit" onclick="bjHit()">🃏 Carta</button><button class="btn" id="stand" onclick="bjStand()">✋ Parar</button></div><div class="result" id="bResult">Comece uma mão.</div></div></section>
+
+<section id="highlow" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🎲 High Roller</h2><button class="gameHelp" onclick="showHelp('highlow')" aria-label="Como funciona">?</button></div><div class="muted">Maior ou menor?</div></div><div class="wallet">🪙 <b class="live">0</b></div></div><div class="cardReveal"><div class="bigCard" id="ha">?</div><div class="arrow">→</div><div class="bigCard" id="hb">?</div></div><div class="betbar"><div class="field"><label>Fichas</label><input id="hBet" type="number" min="1" value="100"></div><button class="btn" onclick="highlow('high')">⬆️ MAIOR</button><button class="btn" onclick="highlow('low')">⬇️ MENOR</button></div><div class="result" id="hResult">Escolha maior ou menor.</div></div></section>
+
+<section id="dice" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🎲 Duelo de Dados</h2><button class="gameHelp" onclick="showHelp('dice')" aria-label="Como funciona">?</button></div><div class="muted">Role dois dados contra a banca</div></div><div class="wallet">🪙 <b class="live">0</b></div></div><div class="diceArena"><div><div class="muted">VOCÊ</div><div class="die" id="pd">🎲</div></div><div style="font-size:30px;color:#f4ce62">VS</div><div><div class="muted">BANCA</div><div class="die" id="dd">🎲</div></div></div><div class="betbar"><div class="field"><label>Fichas</label><input id="diceBet" type="number" min="1" value="100"></div><button class="btn gold" id="diceBtn" onclick="diceGame()">🎲 ROLAR</button></div><div class="result" id="diceResult">Quem terá a maior soma?</div></div></section>
+
+<section id="coin" class="game"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel stage"><div class="gameHead"><div><div class="helpTitle"><h2>🪙 Cara ou Coroa</h2><button class="gameHelp" onclick="showHelp('coin')" aria-label="Como funciona">?</button></div><div class="muted">Escolha um lado da moeda</div></div><div class="wallet">🪙 <b class="live">0</b></div></div><div class="coin" id="coinVisual">⚽<br><small style="font-size:20px">CR7</small></div><div class="betbar"><div class="field"><label>Fichas</label><input id="coinBet" type="number" min="1" value="100"></div><button class="btn" onclick="coinGame('cara')">🙂 CARA</button><button class="btn" onclick="coinGame('coroa')">👑 COROA</button></div><div class="result" id="coinResult">Escolha seu lado.</div></div></section>
+
+<section id="horses" class="game">
+<button class="btn" onclick="goHome()">← Voltar</button>
+<div class="panel stage">
+  <div class="gameHead">
+    <div>
+      <div class="helpTitle"><h2>🏇 Corrida MCO</h2><button class="gameHelp" onclick="showHelp('horses')" aria-label="Como funciona">?</button></div>
+      <div class="muted">Corrida animada • resultado independente em cada rodada</div>
+    </div>
+    <div class="wallet">🪙 <b class="live">0</b></div>
+  </div>
+
+  <div class="betbar">
+    <div class="field"><label>Escolha seu cavalo</label>
+      <select id="horsePick">
+<option value="1">⚪ Pé de Pano</option>
+<option value="2">⚫ Kid Bengala</option>
+<option value="3">🔴 Nordestino</option>
+<option value="4">🔵 Sonic</option>
+<option value="5">🟡 Relâmpago</option>
+<option value="6">🩷 Bruninho</option>
+</select>
+    </div>
+    <div class="field"><label>Fichas da aposta</label><input id="horseBet" type="number" min="1" value="100"></div>
+    <button class="btn gold" id="horseBtn" onclick="horseRace()">🏁 CORRER</button>
+  </div>
+
+  <div class="horseTrack" id="horseTrack"></div>
+  <div class="result" id="horseResult">Escolha um cavalo e comece a corrida.</div>
+</div>
+</section>
+
+<section id="admin" class="admin"><button class="btn" onclick="goHome()">← Voltar</button><div class="panel" style="padding:22px"><h2>🔐 Administração do Casino</h2><p class="muted">Somente o administrador cadastra participantes. Não existe cadastro público.</p><p class="muted">Você define uma <b>senha de 2 dígitos</b> para cada participante. O participante entra apenas com <b>nome + senha</b>.</p></div>
+<div class="adminGrid"><div class="card adminForm"><h3>➕ Cadastrar participante</h3><div class="formGrid"><div class="field"><label>Nome do presidente</label><input id="newName" placeholder="Ex.: João Davi"></div><div class="field"><label>Senha (2 dígitos)</label><input id="newId" inputmode="numeric" maxlength="2" placeholder="Ex.: 07"></div><div class="field"><label>Fichas iniciais</label><input id="newBal" type="number" min="0" value="0"></div></div><br><button class="btn gold" onclick="addParticipant()">Criar participante</button></div>
+<div class="card adminForm"><h3>📊 Resumo</h3><p>Participantes: <b id="aCount">0</b></p><p>Fichas em circulação: <b id="aTotal">0</b> 🪙</p><p class="muted" style="font-size:12px">Os participantes ficam salvos no banco online do Casino MCO.</p><button class="btn" onclick="cloudLoad()">🔄 Atualizar</button></div></div>
+<div class="sectionTitle"><h2>👥 Participantes cadastrados</h2><span class="muted">senha • fichas</span></div><div class="card participants" id="participants"></div>
+<div class="sectionTitle"><h2>📜 Auditoria</h2></div><div class="card audit" id="audit"></div></section>
+</main><footer>Casino MCO V14 • fichas exclusivamente virtuais • universo do Modo Carreira Online</footer>
+
+<div class="overlay" id="loginOverlay"><div class="login"><span class="eyebrow">🔐 ACESSO DO PARTICIPANTE</span><h2>Entre na sua mesa</h2><p>Digite os dados cadastrados pela administração.</p><div class="loginGrid"><div class="field"><label>Nome do presidente</label><input id="loginName" placeholder="Seu nome"></div><div class="field"><label>Senha de 2 dígitos</label><input id="loginId" inputmode="numeric" maxlength="2" placeholder="00"></div></div><div class="hint">🛡️ O nome e a senha precisam corresponder ao mesmo participante.</div><div class="loginActions"><button class="btn" onclick="closeLogin()">Cancelar</button><button class="btn primary" onclick="login()">Entrar</button></div></div></div>
+<div class="overlay" id="helpOverlay"><div class="helpModal"><div class="helpTitle"><h2 id="helpHeading">Como funciona</h2><button class="gameHelp" onclick="closeHelp()">×</button></div><div class="helpBody" id="helpBody"></div><div class="loginActions" style="margin-top:18px"><button class="btn primary" onclick="closeHelp()">Entendi</button></div></div></div><div class="toast" id="toast"></div>
+
+<script>
+
+const COIN_VALUE_EUR = 100000;
+
+const SUPABASE_URL='https://pmajspnjuszheoakdqgs.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_WzMRoJL6A109lwQldYXgTA_7gxSh37b';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const NS='__CASINO_MCO_V3_CLEAN__',AUD='__CASINO_MCO_V3_AUDIT__',ADMIN='MCO2026';
+let participants=[],history=[],current=null,busy=false,bj=null;
+
+const fmt=n=>Number(n||0).toLocaleString('pt-BR'),now=()=>new Date().toLocaleString('pt-BR');
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function toast(x){let t=document.getElementById('toast');t.textContent=x;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),2300)}
+function render(){document.getElementById('topBalance').textContent=fmt(current?.balance);document.getElementById('heroBalance').textContent=fmt(current?.balance);document.getElementById('who').textContent=current?.name||'Nenhum jogador';document.getElementById('whoClub').textContent=current?`🔐 Senha ${current.id}`:'Nome + senha para entrar';document.getElementById('userButton').textContent=current?`👤 ${current.name}`:'🔐 Entrar';document.querySelectorAll('.live').forEach(e=>e.textContent=fmt(current?.balance));renderHistory();renderAdmin()}
+function renderHistory(){let e=document.getElementById('history');if(!current){e.innerHTML='<div class="empty">Entre com seu perfil para ver suas jogadas.</div>';return}let a=history.filter(x=>x.pid===current.id).slice(-40).reverse();e.innerHTML=a.length?a.map(x=>`<div class="historyRow"><span><b>${esc(x.game)}</b><small class="muted"> • ${esc(x.time)}</small></span><b class="${x.delta>=0?'win':'loss'}">${x.delta>=0?'+':''}${fmt(x.delta)} 🪙</b></div>`).join(''):'<div class="empty">Nenhuma jogada ainda.</div>'}
+function renderAdmin(){if(!document.getElementById('participants'))return;document.getElementById('aCount').textContent=participants.length;document.getElementById('aTotal').textContent=fmt(participants.reduce((a,p)=>a+p.balance,0));document.getElementById('participants').innerHTML=participants.length?participants.map(p=>`<div class="person"><div><div class="personName">${esc(p.name)}</div><div class="personMeta">🔐 Senha de acesso</div><span class="idtag">••</span></div><b style="color:#ffe99b">${fmt(p.balance)} 🪙</b><div class="adminButtons"><button class="btn small green" onclick="adjust('${p.id}',1)">➕</button><button class="btn small red" onclick="adjust('${p.id}',-1)">➖</button><button class="btn small" onclick="editP('${p.id}')">✏️</button><button class="btn small red" onclick="removeP('${p.id}')">🗑️</button></div></div>`).join(''):'<div class="empty">Nenhum participante cadastrado.</div>';document.getElementById('audit').innerHTML=history.slice(-120).reverse().map(x=>`<div class="historyRow"><span><b>${esc(x.game)}</b> • ${esc(x.name)}</span><small class="${x.delta>=0?'win':'loss'}">${x.delta>=0?'+':''}${fmt(x.delta)} 🪙 • ${esc(x.time)}</small></div>`).join('')||'<div class="empty">Sem registros.</div>'}
+async function cloudSave(){await sb.from('perfis').upsert({usuario:AUD,bio:JSON.stringify(history.slice(-400)),updated_at:new Date().toISOString()},{onConflict:'usuario'})}
+async function cloudLoad(){try{let {data,error}=await sb.from('casino_mco_participants').select('participant_id,president_name,club_name,balance,updated_at').order('president_name');if(error)throw error;participants=(data||[]).map(x=>({id:String(x.participant_id).padStart(2,'0'),name:x.president_name,team:x.club_name||'',balance:Math.max(0,Number(x.balance)||0)}));let h=await sb.from('perfis').select('bio').eq('usuario',AUD).maybeSingle();if(h.error)throw h.error;history=h.data?.bio?JSON.parse(h.data.bio):[];let saved=localStorage.getItem('casino_mco_pass');current=participants.find(x=>x.id===saved)||null;render()}catch(e){console.error(e);toast('⚠️ Não foi possível sincronizar os participantes online.')}}
+function openLogin(){document.getElementById('loginOverlay').classList.add('on');['loginName','loginId'].forEach(x=>document.getElementById(x).value='');setTimeout(()=>document.getElementById('loginName').focus(),100)}
+function closeLogin(){document.getElementById('loginOverlay').classList.remove('on')}
+function login(){let n=document.getElementById('loginName').value.trim(),id=document.getElementById('loginId').value.trim();if(!/^\d{2}$/.test(id))return toast('❌ A senha precisa ter exatamente 2 dígitos.');let p=participants.find(x=>x.id===id&&x.name.toLowerCase()===n.toLowerCase());if(!p)return toast('❌ Nome ou senha não conferem.');current=p;localStorage.setItem('casino_mco_pass',p.id);closeLogin();render();toast(`✅ Acesso liberado • ${p.name}`)}
+function logout(){current=null;localStorage.removeItem('casino_mco_pass');goHome();toast('Você saiu do perfil.')}
+document.getElementById('userButton').onclick=()=>current?logout():openLogin();
+function openGame(id){if(!current){openLogin();return}document.getElementById('home').style.display='none';document.getElementById('admin').classList.remove('on');document.querySelectorAll('.game').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function goHome(){document.getElementById('home').style.display='block';document.getElementById('admin').classList.remove('on');document.querySelectorAll('.game').forEach(x=>x.classList.remove('active'));render();window.scrollTo(0,0)}
+function openAdmin(){if(prompt('Senha de administração')!==ADMIN)return toast('❌ Senha incorreta.');document.getElementById('home').style.display='none';document.querySelectorAll('.game').forEach(x=>x.classList.remove('active'));document.getElementById('admin').classList.add('on');render();window.scrollTo(0,0)}
+
+async function settle(delta,game){if(!current)return false;if(delta<0&&current.balance<Math.abs(delta))return false;current.balance+=Math.trunc(delta);history.push({pid:current.id,name:current.name,game,time:now(),delta:Math.trunc(delta)});try{const {error}=await sb.from('casino_mco_participants').update({balance:Math.max(0,Math.trunc(current.balance)),updated_at:new Date().toISOString()}).eq('participant_id',current.id);if(error)throw error}catch(e){console.warn('Saldo online não atualizado:',e);toast('⚠️ Não foi possível salvar o saldo online.');return false}try{await cloudSave()}catch(e){}render();return true}
+function validBet(id){let b=Math.trunc(+document.getElementById(id).value||0);if(b<1||!current||current.balance<b){toast('🪙 Aposta inválida ou fichas insuficientes.');return 0}return b}
+
+const reds=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),order=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const helpTexts={
+roulette:{title:'🎡 Roleta MCO',body:'Você escolhe a quantidade de fichas e o tipo de aposta. A roda gira rapidamente e desacelera de forma natural antes de parar. Vermelho, preto, par e ímpar pagam 2x. Acertar um número específico paga 36x.'},
+slots:{title:'🎰 Slots Royale',body:'Defina sua aposta e gire os três rolos. Vários símbolos passam rapidamente enquanto os rolos giram. Eles param um por vez. Três iguais podem pagar até 50x; duas figuras iguais pagam 2x.'},
+blackjack:{title:'🃏 Blackjack 21',body:'Você recebe duas cartas contra a banca. Use Carta para comprar outra ou Parar para encerrar sua vez. O objetivo é chegar o mais perto possível de 21 sem passar. Se vencer, ganha o valor da aposta.'},
+highlow:{title:'🎲 High Roller',body:'Uma carta é mostrada e outra é revelada. Você escolhe MAIOR ou MENOR. Se acertar, ganha o valor da aposta; se errar, perde. Empate devolve a aposta.'},
+dice:{title:'🎲 Duelo de Dados',body:'Você e a banca rolam um dado. Os dados mudam de face enquanto rolam. O maior número vence e rende o valor da aposta. Empate devolve a aposta.'},
+coin:{title:'🪙 Cara ou Coroa',body:'Escolha CARA ou COROA. CARA usa um avatar futebolístico estilizado CR7 e COROA usa uma coroa. A moeda gira e revela o lado sorteado. Acertou: ganha a aposta. Errou: perde.'},
+horses:{title:'🏇 Corrida MCO',body:'Escolha um dos seis cavalos (Pé de Pano, Kid Bengala, Nordestino, Sonic, Relâmpago ou Bruninho) e o valor da aposta. Cada corrida sorteia um resultado novo e independente. Os cavalos avançam com animação e o vencedor é definido pelo sorteio daquela corrida. O pagamento da vitória é calculado pela regra do jogo.'}
+};
+function showHelp(game){let x=helpTexts[game];if(!x)return;document.getElementById('helpHeading').textContent=x.title;document.getElementById('helpBody').innerHTML=`<div class="helpRule">${x.body}</div>`;document.getElementById('helpOverlay').classList.add('on')}
+function closeHelp(){document.getElementById('helpOverlay').classList.remove('on')}
+
+
+const HORSE_COUNT=6;
+
+const HORSE_NAMES=['Pé de Pano','Kid Bengala','Nordestino','Sonic','Relâmpago','Bruninho'];
+const HORSE_COLORS=['#f5f5f5','#171717','#d33a3a','#2784e8','#f0c72f','#e78ac3'];
+
+let horseRoundBusy=false;
+function initHorseTrack(){
+  const t=document.getElementById('horseTrack');
+  if(!t)return;
+  t.innerHTML='';
+  for(let i=1;i<=HORSE_COUNT;i++){
+    const color=HORSE_COLORS[i-1];
+    const textColor=(i===1||i===5||i===6)?'#171717':'#fff';
+    t.insertAdjacentHTML('beforeend',`<div class="horseLane" id="horseLane${i}" style="--horseColor:${color}">
+      <span class="horseLabel" style="background:${color};color:${textColor}">${i} • ${HORSE_NAMES[i-1]}</span>
+      <span class="horseRunner" id="horseRunner${i}">🏇</span>
+    </div>`);
+  }
+}
+function secureRandomInt(max){
+  if(window.crypto && crypto.getRandomValues){
+    const a=new Uint32Array(1); crypto.getRandomValues(a);
+    const limit=Math.floor(0x100000000/max)*max;
+    if(a[0]<limit)return a[0]%max;
+  }
+  return Math.floor(secureRandom()*max);
+}
+function secureRandom(){
+  return (secureRandomInt(1000000)+0.5)/1000000;
+}
+async function horseRace(){
+  if(horseRoundBusy)return;
+  const bet=Math.trunc(+document.getElementById('horseBet').value||0);
+  const pick=Math.trunc(+document.getElementById('horsePick').value||1);
+  if(!current)return openLogin();
+  if(bet<1)return toast('Digite uma aposta válida.');
+  if(current.balance<bet)return toast('Fichas insuficientes.');
+  horseRoundBusy=true;
+  document.getElementById('horseBtn').disabled=true;
+  initHorseTrack();
+
+  // Every race gets a fresh, independent random finish-time sample.
+  // No fixed sequence/table is reused.
+  const finish=[];
+  for(let i=0;i<HORSE_COUNT;i++){
+    const u=Math.max(1e-12,secureRandom());
+    // Exponential sample: independent, unpredictable race time.
+    finish.push(-Math.log(u));
+  }
+  const order=[0,1,2,3,4,5].sort((a,b)=>finish[a]-finish[b]);
+  const winner=order[0]+1;
+
+  const lanes=[1,2,3,4,5,6];
+  const start=performance.now(), duration=3600;
+  while(performance.now()-start<duration){
+    const t=Math.min(1,(performance.now()-start)/duration);
+    for(const i of lanes){
+      const noise=(secureRandom()-.5)*3;
+      const speed=Math.pow(t,0.88);
+      const pos=Math.min(90, speed*(82 + (1/(finish[i-1]+.18))*6))+noise;
+      const el=document.getElementById('horseRunner'+i);
+      if(el)el.style.left=`${Math.max(0,pos)}%`;el.style.transform='translateX(-100%)';
+    }
+    await new Promise(r=>requestAnimationFrame(r));
+  }
+
+  // Natural-looking final stagger based on the independent samples.
+  for(let rank=0;rank<order.length;rank++){
+    const i=order[rank]+1;
+    const el=document.getElementById('horseRunner'+i);
+    if(el){el.style.left='94%';el.style.transform='translateX(-100%)';}
+    const lane=document.getElementById('horseLane'+i);
+    if(lane)lane.classList.add('finished');
+    await new Promise(r=>setTimeout(r,rank===0?80:120));
+  }
+
+  const delta=winner===pick?bet:-bet;
+  document.getElementById('horseResult').innerHTML=winner===pick
+    ? `🏆 ${HORSE_NAMES[winner-1]} venceu! <span class="win">+${fmt(bet)} 🪙</span>`
+    : `🏁 ${HORSE_NAMES[winner-1]} venceu. <span class="loss">-${fmt(bet)} 🪙</span>`;
+  await settle(delta,'Corrida MCO');
+  horseRoundBusy=false;
+  document.getElementById('horseBtn').disabled=false;
+}
+
+
+
+function buildWheel(){let r=document.getElementById('numberRing');order.forEach((n,i)=>{let x=document.createElement('span');x.className='num';let a=i*360/37;x.textContent=n;x.style.transform=`rotate(${a}deg) translateY(-${Math.min(150,innerWidth*.37)}px) rotate(${-a}deg)`;r.appendChild(x)})}
+function toggleR(){document.getElementById('rNumField').style.display=document.getElementById('rType').value==='number'?'grid':'none'}
+async function roulette(){if(busy)return;let bet=validBet('rBet');if(!bet)return;busy=true;let n=secureRandomInt(37),type=document.getElementById('rType').value,target=+document.getElementById('rTarget').value,w=document.getElementById('wheel'),wrap=document.getElementById('rw');document.getElementById('rBtn').disabled=true;document.getElementById('rResult').textContent='🎡 A roda está girando...';wrap.classList.add('spinning');w.style.transform=`rotate(${360*5+(360-(order.indexOf(n)*360/37+360/74))}deg)`;await new Promise(r=>setTimeout(r,5800));wrap.classList.remove('spinning');document.getElementById('rNumOut').textContent=n;let win=type==='red'?reds.has(n):type==='black'?(n>0&&!reds.has(n)):type==='even'?(n>0&&n%2===0):type==='odd'?n%2===1:n===target;let mult=type==='number'?36:2,delta=win?bet*(mult-1):-bet;document.getElementById('rResult').innerHTML=win?`🎉 <span class="win">${n} • +${fmt(delta)} 🪙</span>`:`💥 ${n} • <span class="loss">-${fmt(bet)} 🪙</span>`;await settle(delta,'Roleta');busy=false;document.getElementById('rBtn').disabled=false}
+
+const symbols=['🍒','🍋','🔔','⭐','💎','7️⃣'],weights=[30,25,18,14,9,4];function weighted(){let q=secureRandom()*100;let s=0;for(let i=0;i<weights.length;i++){s+=weights[i];if(q<s)return symbols[i]}}
+async function slots(){if(busy)return;let bet=validBet('sBet');if(!bet)return;busy=true;document.getElementById('sBtn').disabled=true;let reels=[s1,s2,s3],final=[weighted(),weighted(),weighted()];let timers=reels.map((el,i)=>setInterval(()=>el.textContent=weighted(),75+i*18));reels.forEach(x=>x.classList.add('spin'));await new Promise(r=>setTimeout(r,1150));for(let i=0;i<3;i++){clearInterval(timers[i]);reels[i].classList.remove('spin');reels[i].textContent=final[i];await new Promise(r=>setTimeout(r,420))}let a=final,mult=0;if(a[0]===a[1]&&a[1]===a[2])mult=a[0]==='7️⃣'?50:a[0]==='💎'?25:a[0]==='⭐'?15:10;else if(a[0]===a[1]||a[1]===a[2]||a[0]===a[2])mult=2;let delta=mult?bet*(mult-1):-bet;if(mult)reels.forEach(x=>x.classList.add('flash'));sResult.innerHTML=mult?`🎉 <span class="win">${a.join(' ')} • ${mult}x • +${fmt(delta)} 🪙</span>`:`😔 ${a.join(' ')} • <span class="loss">-${fmt(bet)} 🪙</span>`;await settle(delta,'Slots Royale');busy=false;sBtn.disabled=false}
+
+function deck(){let d=[],s=['♠','♥','♦','♣'],v=[['A',11],['2',2],['3',3],['4',4],['5',5],['6',6],['7',7],['8',8],['9',9],['10',10],['J',10],['Q',10],['K',10]];for(let z of s)for(let q of v)d.push({c:q[0]+z,v:q[1],a:q[0]==='A',red:z==='♥'||z==='♦'});return d.sort(()=>secureRandom()-.5)}
+function score(h){let s=h.reduce((a,x)=>a+x.v,0),a=h.filter(x=>x.a).length;while(s>21&&a--)s-=10;return s}
+function bjRender(hide=true){dCards.innerHTML=(bj?.dealer||[]).map((c,i)=>`<div class="playing ${c.red?'redCard':''}">${hide&&i===1?'🂠':esc(c.c)}</div>`).join('');pCards.innerHTML=(bj?.player||[]).map(c=>`<div class="playing ${c.red?'redCard':''}">${esc(c.c)}</div>`).join('');dScore.textContent=hide?'?':score(bj?.dealer||[]);pScore.textContent=bj?score(bj.player):'—'}
+function bjBtns(v){hit.disabled=!v;stand.disabled=!v}
+function bjStart(){if(bj)return toast('Termine a mão atual.');let bet=validBet('bBet');if(!bet)return;bj={deck:deck(),bet,player:[],dealer:[]};bj.player.push(bj.deck.pop(),bj.deck.pop());bj.dealer.push(bj.deck.pop(),bj.deck.pop());bjRender(true);bjBtns(true);bResult.textContent='Sua vez.'}
+async function bjHit(){if(!bj)return;bj.player.push(bj.deck.pop());bjRender(true);if(score(bj.player)>21)await bjFinish('bust')}
+async function bjStand(){if(!bj)return;bjBtns(false);while(score(bj.dealer)<17){bj.dealer.push(bj.deck.pop());bjRender(false);await new Promise(r=>setTimeout(r,280))}await bjFinish()}
+async function bjFinish(force){bjRender(false);let ps=score(bj.player),ds=score(bj.dealer),delta;if(force==='bust'||ps>21){delta=-bj.bet;bResult.textContent='💥 Você estourou.'}else if(ds>21||ps>ds){delta=bj.bet;bResult.textContent='🎉 Você venceu a banca!'}else if(ps===ds){delta=0;bResult.textContent='🤝 Empate.'}else{delta=-bj.bet;bResult.textContent='🧤 A banca venceu.'}await settle(delta,'Blackjack 21');bj=null;bjBtns(false)}
+
+function highlow(choice){if(busy)return;let bet=validBet('hBet');if(!bet)return;busy=true;let a=2+Math.floor(secureRandom()*13),b=2+Math.floor(secureRandom()*13);ha.textContent=val(a);hb.textContent='?';hb.classList.remove('flip');void hb.offsetWidth;hb.classList.add('flip');setTimeout(async()=>{hb.textContent=val(b);hb.classList.remove('flip');void hb.offsetWidth;hb.classList.add('flip');let tie=a===b,win=choice==='high'?b>a:b<a,delta=tie?0:win?bet:-bet;hResult.innerHTML=tie?'🤝 Empate.':win?`🎉 <span class="win">Acertou! +${fmt(bet)} 🪙</span>`:`💥 <span class="loss">Errou! -${fmt(bet)} 🪙</span>`;await settle(delta,'High Roller');busy=false},720)}
+function val(n){return n===11?'J':n===12?'Q':n===13?'K':n===14?'A':n}
+
+async function diceGame(){if(busy)return;let bet=validBet('diceBet');if(!bet)return;busy=true;diceBtn.disabled=true;let faces=['⚀','⚁','⚂','⚃','⚄','⚅'];let rollTimer=setInterval(()=>{pd.textContent=faces[secureRandomInt(6)];dd.textContent=faces[secureRandomInt(6)]},85);pd.classList.add('shake');dd.classList.add('shake');await new Promise(r=>setTimeout(r,1100));clearInterval(rollTimer);let a=1+secureRandomInt(6),b=1+secureRandomInt(6);pd.textContent=faces[a-1];dd.textContent=faces[b-1];pd.classList.remove('shake');dd.classList.remove('shake');let delta=a===b?0:a>b?bet:-bet;diceResult.innerHTML=a===b?'🤝 Empate — aposta devolvida.':a>b?`🎉 <span class="win">${a} x ${b} • +${fmt(bet)} 🪙</span>`:`💥 <span class="loss">${a} x ${b} • -${fmt(bet)} 🪙</span>`;await settle(delta,'Duelo de Dados');busy=false;diceBtn.disabled=false}
+
+async function coinGame(choice){if(busy)return;let bet=validBet('coinBet');if(!bet)return;busy=true;let c=document.getElementById('coinVisual');c.classList.remove('flip');void c.offsetWidth;c.classList.add('flip');await new Promise(r=>setTimeout(r,1300));let result=secureRandom()<.5?'cara':'coroa';c.innerHTML=result==='cara'?'⚽<br><small style="font-size:20px">CR7</small>':'👑<br><small style="font-size:20px">COROA</small>';let win=result===choice,delta=win?bet:-bet;coinResult.innerHTML=win?`🎉 <span class="win">${result.toUpperCase()} • +${fmt(bet)} 🪙</span>`:`💥 Deu ${result.toUpperCase()} • <span class="loss">-${fmt(bet)} 🪙</span>`;await settle(delta,'Cara ou Coroa');busy=false}
+
+async function penalty(choice){if(busy)return;let bet=validBet('penBet');if(!bet)return;busy=true;let keeper=document.getElementById('keeper'),ball=document.getElementById('penBall'),dirs=['left','center','right'],k=dirs[Math.floor(secureRandom()*3)];ball.classList.remove('shoot');void ball.offsetWidth;ball.classList.add('shoot');keeper.style.left=k==='left'?'25%':k==='right'?'75%':'50%';await new Promise(r=>setTimeout(r,650));let win=k!==choice,delta=win?bet:-bet;penResult.innerHTML=win?`⚽ <span class="win">GOOOOL! +${fmt(bet)} 🪙</span>`:`🧤 <span class="loss">DEFESA! -${fmt(bet)} 🪙</span>`;await settle(delta,'Pênalti MCO');busy=false}
+
+async function addParticipant(){
+  const name=document.getElementById('newName').value.trim();
+  const pass=String(document.getElementById('newId').value||'').replace(/\D/g,'').slice(0,2);
+  const bal=Math.max(0,Math.trunc(Number(document.getElementById('newBal').value)||0));
+  if(!name)return toast('Informe o nome do participante.');
+  if(!/^\d{2}$/.test(pass))return toast('A senha precisa ter exatamente 2 dígitos.');
+  try{
+    const {data:existing,error:checkError}=await sb.from('casino_mco_participants').select('participant_id').eq('participant_id',pass).maybeSingle();
+    if(checkError)throw checkError;
+    if(existing)return toast('Essa senha já está em uso. Escolha outra.');
+    const {error}=await sb.from('casino_mco_participants').insert({participant_id:pass,president_name:name,club_name:'',balance:bal,updated_at:new Date().toISOString()});
+    if(error)throw error;
+    history.push({pid:pass,name,game:'Administração',time:now(),delta:bal});
+    document.getElementById('newName').value='';document.getElementById('newId').value='';document.getElementById('newBal').value=0;
+    await cloudSave();await cloudLoad();toast(`✅ ${name} cadastrado com sucesso.`);
+  }catch(e){console.error('Cadastro online:',e);toast('⚠️ Não foi possível cadastrar online. Tente outra senha de 2 dígitos.');}
+}
+async function adjust(id,sign){const p=participants.find(x=>x.id===id);if(!p)return;const n=Math.trunc(Number(prompt(`${sign>0?'Adicionar':'Retirar'} fichas de ${p.name}`,'1'))||0);if(!n||n<1)return;if(sign<0&&p.balance<n)return toast('Saldo insuficiente.');const next=p.balance+sign*n;try{const {error}=await sb.from('casino_mco_participants').update({balance:next,updated_at:new Date().toISOString()}).eq('participant_id',String(id).padStart(2,'0'));if(error)throw error;history.push({pid:id,name:p.name,game:'Administração',time:now(),delta:sign*n});await cloudSave();await cloudLoad()}catch(e){console.error(e);toast('⚠️ Não foi possível atualizar as fichas online.')}}
+async function editP(id){const p=participants.find(x=>x.id===id);if(!p)return;const n=prompt('Nome',p.name),pass=prompt('Senha de 2 dígitos',p.id),b=prompt('Fichas',p.balance);if(n===null||pass===null||b===null)return;const name=n.trim()||p.name,newPass=String(pass).replace(/\D/g,'');if(!/^\d{2}$/.test(newPass))return toast('A senha precisa ter exatamente 2 dígitos.');const next=Math.max(0,Math.trunc(Number(b)||0));try{if(newPass!==p.id){const {data:exists,error:ce}=await sb.from('casino_mco_participants').select('participant_id').eq('participant_id',newPass).maybeSingle();if(ce)throw ce;if(exists)return toast('Essa senha já está em uso.')}const {error}=await sb.from('casino_mco_participants').update({participant_id:newPass,president_name:name,balance:next,updated_at:new Date().toISOString()}).eq('participant_id',p.id);if(error)throw error;if(current?.id===p.id){current=null;localStorage.removeItem('casino_mco_pass')}await cloudLoad();toast('✅ Participante atualizado.')}catch(e){console.error(e);toast('⚠️ Não foi possível editar online.')}}
+async function removeP(id){const p=participants.find(x=>x.id===id);if(!p)return;if(!confirm(`Excluir ${p.name}?`))return;try{const {error}=await sb.from('casino_mco_participants').delete().eq('participant_id',String(id).padStart(2,'0'));if(error)throw error;if(current?.id===id)logout();await cloudLoad();toast('Participante excluído.')}catch(e){console.error(e);toast('⚠️ Não foi possível excluir online.')}}
+
+buildWheel();initHorseTrack();cloudLoad();
+
+</script></body></html>
